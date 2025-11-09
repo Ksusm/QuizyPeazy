@@ -131,9 +131,9 @@ import questionService from "../../services/question.service";
 const questionController = {
   async create(req: express.Request, res: express.Response) {
     try {
-      const catDto = req.body;
-      const newCat = await questionService.create(catDto);
-      res.status(201).json(newCat);
+      const questionDto = req.body;
+      const newQuestion = await questionService.create(questionDto);
+      res.status(201).json(newQuestion);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
@@ -141,8 +141,8 @@ const questionController = {
 
   async findAll(req: express.Request, res: express.Response) {
     try {
-      const cats = await questionService.findAll();
-      res.status(200).json(cats);
+      const questions = await questionService.findAll();
+      res.status(200).json(questions);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -151,11 +151,11 @@ const questionController = {
   async findById(req: express.Request, res: express.Response) {
     try {
       const id = req.params.id;
-      const cat = await questionService.findById(id);
-      if (cat) {
-        res.status(200).json(cat);
+      const question = await questionService.findById(id);
+      if (question) {
+        res.status(200).json(question);
       } else {
-        res.status(404).json({ message: "Cat not found" });
+        res.status(404).json({ message: "Question not found" });
       }
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -165,12 +165,12 @@ const questionController = {
   async update(req: express.Request, res: express.Response) {
     try {
       const id = req.params.id;
-      const catDto = req.body;
-      const updatedCat = await questionService.update(id, catDto);
-      if (updatedCat) {
-        res.status(200).json(updatedCat);
+      const questionDto = req.body;
+      const updatedQuestion = await questionService.update(id, questionDto);
+      if (updatedQuestion) {
+        res.status(200).json(updatedQuestion);
       } else {
-        res.status(404).json({ message: "Cat not found" });
+        res.status(404).json({ message: "Question not found" });
       }
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -181,7 +181,7 @@ const questionController = {
     try {
       const id = req.params.id;
       await questionService.delete(id);
-      res.status(204).json({ message: "Cat deleted" });
+      res.status(204).json({ message: "Question deleted" });
     } catch (error) {
       res.status(400).json({ message: error.message });
     }

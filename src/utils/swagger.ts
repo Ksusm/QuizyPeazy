@@ -4,11 +4,11 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Documentation',
+      title: 'Quizy-Peazy API Documentation',
       version: '1.0.0',
     },
   },
-  apis: ['src/api/controllers/*.ts', 'src/types/*.ts'], // adjust as needed
+  apis: ['src/api/controllers/*.ts', 'src/types/*.ts'],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);

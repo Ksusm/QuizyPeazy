@@ -13,8 +13,8 @@ server.use(express.urlencoded({ extended: true }));
 server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 server.get("/status", statusController.getStatus);
-server.post("/cats", questionController.create);
-server.get("/cats", questionController.findAll);
-server.get("/cats/:id", questionController.findById);
-server.put("/cats/:id", questionController.update);
-server.delete("/cats/:id", questionController.delete);
+server.post("/questions", questionController.create);
+server.get("/questions", questionController.findAll);
+server.get("/questions/:id", questionController.findById);
+server.put("/questions/:id", questionController.update);
+server.delete("/questions/:id", questionController.delete);
