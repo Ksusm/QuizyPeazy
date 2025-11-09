@@ -1,8 +1,8 @@
 import statusController from "./controllers/status.controller";
 import questionController from "./controllers/question.controller";
 
-const express = require("express");
-import swaggerUi from "swagger-ui-express";
+import express = require("express");
+import swaggerUi = require("swagger-ui-express");
 import { swaggerSpec } from "../utils/swagger";
 
 export const server = express();
