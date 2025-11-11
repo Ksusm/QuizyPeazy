@@ -125,13 +125,17 @@
  *       400:
  *         description: Invalid ID
  */
-import * as express from "express";
+import 'reflect-metadata';
+import { Request, Response } from 'express';
 import questionService from "../../services/question.service";
+import { validateBody, validateParams } from "../../middleware/validation.middleware";
+import { QuestionDto } from "../../types/dto/question.dto";
+import { IdParam } from "../../types/base.dto";
 
 const questionController = {
-  async create(req: express.Request, res: express.Response) {
+  async create(req: Request, res: Response) {
     try {
-      const questionDto = req.body;
+      const questionDto = await validateBody(req, QuestionDto);
       const newQuestion = await questionService.create(questionDto);
       res.status(201).json(newQuestion);
     } catch (error) {
@@ -139,7 +143,7 @@ const questionController = {
     }
   },
 
-  async findAll(req: express.Request, res: express.Response) {
+  async findAll(req: Request, res: Response) {
     try {
       const questions = await questionService.findAll();
       res.status(200).json(questions);
@@ -148,40 +152,41 @@ const questionController = {
     }
   },
 
-  async findById(req: express.Request, res: express.Response) {
+  async findById(req: Request, res: Response) {
     try {
-      const id = req.params.id;
+      const { id } = await validateParams(req, IdParam);
       const question = await questionService.findById(id);
-      if (question) {
-        res.status(200).json(question);
-      } else {
-        res.status(404).json({ message: "Question not found" });
+      if (question === null) {
+        res.status(404).send();
+        return;
       }
+      res.status(200).json(question);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
 
-  async update(req: express.Request, res: express.Response) {
+  async update(req: Request, res: Response) {
     try {
-      const id = req.params.id;
-      const questionDto = req.body;
+      const { id } = await validateParams(req, IdParam);
+      const questionDto = await validateBody(req, QuestionDto);
+      const existingQuestion = await questionService.update(id, questionDto);
+      if (existingQuestion === null) {
+        res.status(404).send();
+        return;
+      }
       const updatedQuestion = await questionService.update(id, questionDto);
-      if (updatedQuestion) {
-        res.status(200).json(updatedQuestion);
-      } else {
-        res.status(404).json({ message: "Question not found" });
-      }
+      res.status(200).json(updatedQuestion);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
 
-  async delete(req: express.Request, res: express.Response) {
+  async delete(req: Request, res: Response) {
     try {
-      const id = req.params.id;
+      const { id } = await validateParams(req, IdParam);
       await questionService.delete(id);
-      res.status(204).json({ message: "Question deleted" });
+      res.status(204).send();
     } catch (error) {
       res.status(400).json({ message: error.message });
     }

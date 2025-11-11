@@ -27,7 +27,7 @@ const questionService = {
 
   async findById(id: string) {
     const question = await this.question_collection.findOne({ _id: new ObjectId(id) });
-    return question;
+    return question || null;
   },
 
   async update(id: string, questionDto: QuestionDto) {
@@ -36,7 +36,7 @@ const questionService = {
       throw new Error("correctIndex is out of bounds");
     }
 
-    return await this.question_collection.findOneAndUpdate(
+    const result = await this.question_collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: {
           text: questionDto.text,
@@ -46,6 +46,7 @@ const questionService = {
       },
       { returnDocument: "after" }
     );
+    return result || null;
   },
 
   async delete(id: string) {
