@@ -7,10 +7,16 @@ This README would normally document whatever steps are necessary to get your app
 * Quick summary
 * Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
+  
 ### How do I get set up? ###
 
 * Summary of set up
+
+      docker run -d -p 27018:27017 --name mongo mongo:latest
+      npm run
+      http://localhost:3000/api-docs/#/
+      npm test
+
 * Configuration
 * Dependencies
 * Database configuration
