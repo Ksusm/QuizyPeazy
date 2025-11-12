@@ -4,18 +4,23 @@ import {ObjectId} from "mongodb";
 import request from "../request";
 
 describe('GET /questions', () =>{
+    let questionId1: ObjectId;
+    let questionId2: ObjectId;
     beforeEach(async () => {
         await mongo.db.collection("questions").deleteMany({});
 
+        questionId1 = new ObjectId();
+        questionId2 = new ObjectId();
+
         await mongo.db.collection("questions").insertMany([
             {
-                _id: new ObjectId('q10000000000000000000001'),
+                _id: questionId1,
                 text: 'What is the capital of France?',
                 answers: ['Paris', 'London', 'Berlin', 'Madrid'],
                 correctIndex: 0,
             },
             {
-                _id: new ObjectId('q10000000000000000000002'),
+                _id: questionId2,
                 text: 'What is 2 + 2?',
                 answers: ['3', '4', '5', '6'],
                 correctIndex: 1,

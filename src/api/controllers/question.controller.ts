@@ -170,12 +170,13 @@ const questionController = {
     try {
       const { id } = await validateParams(req, IdParam);
       const questionDto = await validateBody(req, QuestionDto);
-      const existingQuestion = await questionService.update(id, questionDto);
-      if (existingQuestion === null) {
-        res.status(404).send();
-        return;
-      }
+
       const updatedQuestion = await questionService.update(id, questionDto);
+
+      if (!updatedQuestion) {
+        return res.status(404).send();
+      }
+
       res.status(200).json(updatedQuestion);
     } catch (error) {
       res.status(400).json({ message: error.message });

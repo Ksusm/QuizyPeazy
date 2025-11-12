@@ -1,38 +1,29 @@
-import { Config } from "../../config";
 import * as mongodb from "mongodb";
 
-const mongo = {
-  client: null as mongodb.MongoClient | null,
-  db: null as mongodb.Db | null,
-
-  init() {
-    if (!Config.mongo.url) {
-      throw new Error("Mongo URL is not defined");
-    }
-    this.client = new mongodb.MongoClient(Config.mongo.url);
-    this.db = this.client.db(Config.mongo.dbName);
-  },
+class Mongo {
+  client: mongodb.MongoClient | null = null;
+  db: mongodb.Db | null = null;
 
   async connect() {
-    console.log("Connecting to Mongo...");
+    const url = process.env.MONGO_URL;
+    const dbName = process.env.MONGO_DB_NAME;
 
-    if (!this.client) {
-      this.init();
-    }
+    if (!url) throw new Error("Mongo URL is not defined");
 
-    // The assertion !this.client is for type safety after init()
-    await this.client!.connect();
+    this.client = new mongodb.MongoClient(url);
+    await this.client.connect();
 
+    this.db = dbName ? this.client.db(dbName) : this.client.db();
     console.log("Connected to Mongo.");
-  },
+  }
 
   async disconnect() {
     if (this.client) {
       await this.client.close();
+      this.client = null;
+      this.db = null;
     }
-  },
-};
+  }
+}
 
-mongo.init();
-
-export default mongo;
+export default new Mongo();
