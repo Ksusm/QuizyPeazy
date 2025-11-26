@@ -8,7 +8,8 @@ async function init() {
   await mongo.connect();
 
   server.listen(port, () => {
-    console.log(`jsem na portu ${port}`);
+    console.log(`Quizy-Peazy backend running on port ${port}`);
+    console.log(`API Docs: http://localhost:${port}/api-docs`);
   });
 }
 
