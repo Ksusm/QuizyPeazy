@@ -127,10 +127,10 @@
  */
 import 'reflect-metadata';
 import { Request, Response } from 'express';
-import questionService from "../../services/question.service";
-import { validateBody, validateParams } from "../../middleware/validation.middleware";
-import { QuestionDto } from "../../types/dto/question.dto";
-import { IdParam } from "../../types/base.dto";
+import questionService from "../../../services/question.service";
+import { validateBody, validateParams } from "../../../middleware/validation.middleware";
+import { QuestionDto } from "../../../types/dto/question.dto";
+import { IdParam } from "../../../types/base.dto";
 
 const questionController = {
   async create(req: Request, res: Response) {
