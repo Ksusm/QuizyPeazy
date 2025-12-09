@@ -3,6 +3,9 @@
  * /questions:
  *   post:
  *     summary: Create a new trivia question
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,31 +29,18 @@
  *         description: Question created
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  *   get:
  *     summary: Get all questions
+ *     tags: [Questions]
  *     responses:
  *       200:
  *         description: A list of questions
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   text:
- *                     type: string
- *                   answers:
- *                     type: array
- *                     items:
- *                       type: string
- *                   correctIndex:
- *                     type: integer
  * /questions/{id}:
  *   get:
  *     summary: Get a question by ID
+ *     tags: [Questions]
  *     parameters:
  *       - in: path
  *         name: id
@@ -60,27 +50,15 @@
  *     responses:
  *       200:
  *         description: A single question
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                 text:
- *                   type: string
- *                 answers:
- *                   type: array
- *                   items:
- *                     type: string
- *                 correctIndex:
- *                   type: integer
  *       404:
  *         description: Question not found
  *       400:
  *         description: Invalid ID
  *   put:
  *     summary: Update a question by ID
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -109,8 +87,13 @@
  *         description: Question not found
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  *   delete:
  *     summary: Delete a question by ID
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -124,6 +107,8 @@
  *         description: Question not found
  *       400:
  *         description: Invalid ID
+ *       401:
+ *         description: Unauthorized
  */
 import 'reflect-metadata';
 import { Request, Response } from 'express';
@@ -134,63 +119,46 @@ import { IdParam } from "../../../types/base.dto";
 
 const questionController = {
   async create(req: Request, res: Response) {
-    try {
-      const questionDto = await validateBody(req, QuestionDto);
-      const newQuestion = await questionService.create(questionDto);
-      res.status(201).json(newQuestion);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+    const questionDto = await validateBody(req, QuestionDto);
+    const newQuestion = await questionService.create(questionDto);
+    res.status(201).json(newQuestion);
   },
 
   async findAll(req: Request, res: Response) {
-    try {
-      const questions = await questionService.findAll();
-      res.status(200).json(questions);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
+    const questions = await questionService.findAll();
+    res.status(200).json(questions);
   },
 
   async findById(req: Request, res: Response) {
-    try {
-      const { id } = await validateParams(req, IdParam);
-      const question = await questionService.findById(id);
-      if (question === null) {
-        res.status(404).send();
-        return;
-      }
-      res.status(200).json(question);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    const { id } = await validateParams(req, IdParam);
+    const question = await questionService.findById(id);
+
+    if (question === null) {
+      res.status(404).send();
+      return;
     }
+
+    res.status(200).json(question);
   },
 
   async update(req: Request, res: Response) {
-    try {
-      const { id } = await validateParams(req, IdParam);
-      const questionDto = await validateBody(req, QuestionDto);
+    const { id } = await validateParams(req, IdParam);
+    const questionDto = await validateBody(req, QuestionDto);
+    const existingQuestion = await questionService.findById(id);
 
-      const updatedQuestion = await questionService.update(id, questionDto);
-
-      if (!updatedQuestion) {
-        return res.status(404).send();
-      }
-
-      res.status(200).json(updatedQuestion);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    if (existingQuestion === null) {
+      res.status(404).send();
+      return;
     }
+
+    const updatedQuestion = await questionService.update(id, questionDto);
+    res.status(200).json(updatedQuestion);
   },
 
   async delete(req: Request, res: Response) {
-    try {
-      const { id } = await validateParams(req, IdParam);
-      await questionService.delete(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+    const { id } = await validateParams(req, IdParam);
+    await questionService.delete(id);
+    res.status(204).send();
   },
 };
 
