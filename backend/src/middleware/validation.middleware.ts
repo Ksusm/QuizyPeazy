@@ -1,17 +1,8 @@
-import "reflect-metadata";
-import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
-import { Request } from "express";
-
-class ApiError extends Error {
-    constructor(
-        public type: string,
-        message: string,
-        public statusCode: number
-    ) {
-        super(message);
-    }
-}
+import 'reflect-metadata';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { ApiError } from "../types/api.error";
+import { Request } from 'express';
 
 async function validateData<T>(data: any, type: new () => T): Promise<T> {
     const instance = plainToInstance(type, data);
@@ -22,7 +13,7 @@ async function validateData<T>(data: any, type: new () => T): Promise<T> {
             .map((error) => Object.values(error.constraints!))
             .flat()
             .join(", ");
-        throw new ApiError("bad input", errorMessage, 400);
+        throw new ApiError('bad input', errorMessage, 400);
     }
 
     return instance;
