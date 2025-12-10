@@ -49,6 +49,8 @@ class KeycloakService {
                 {
                     username,
                     email: email || `${username}@quizy-peazy.com`,
+                    firstName: username,
+                    lastName: 'User',
                     enabled: true,
                     emailVerified: true,
                     credentials: [
