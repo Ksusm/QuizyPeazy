@@ -2,30 +2,84 @@ version: '3.8'
 
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:7.0
+    container_name: quizy-mongo
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
-      - quizy-mongo:/data/db
+      - mongo-data:/data/db
     networks:
-      - quizy-net
+      - quizy-network
 
   keycloak:
-    image: quay.io/keycloak/keycloak
-    command: start-dev
-    ports:
-      - "8091:8080"
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: quizy-keycloak
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin123
-    volumes:
-      - keycloak-data:/opt/keycloak/data
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: dev-mem
+    ports:
+      - "8080:8080"
+    command: start-dev
     networks:
-      - quizy-net
+      - quizy-network
+
+  auth-service:
+    build: ./auth-service
+    container_name: quizy-auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_DB_NAME=auth
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=quizy-peazy
+      - KEYCLOAK_CLIENT_ID=quizy-client
+      - KEYCLOAK_CLIENT_SECRET=your-client-secret
+    depends_on:
+      - mongo
+      - keycloak
+    networks:
+      - quizy-network
+
+  question-service:
+    build: ./question-service
+    container_name: quizy-question-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_DB_NAME=questions
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - mongo
+      - auth-service
+    networks:
+      - quizy-network
+
+  game-session-service:
+    build: ./game-session-service
+    container_name: quizy-game-session-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_DB_NAME=game_sessions
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - QUESTION_SERVICE_URL=http://question-service:3002
+    depends_on:
+      - mongo
+      - auth-service
+      - question-service
+    networks:
+      - quizy-network
 
 volumes:
-  quizy-mongo:
-  keycloak-data:
+  mongo-data:
 
 networks:
-  quizy-net:
+  quizy-network:
+    driver: bridge
