@@ -5,6 +5,7 @@ import sessionController from "./controllers/session.controller";
 import { apiErrorHandler } from "./middleware/error.middleware";
 import { authMiddleware } from "./middleware/auth.middleware";
 import mongo from "./database/mongo";
+import { realtimeClient } from "./utils/realtime.client";
 
 export const server = express();
 
@@ -70,6 +71,9 @@ const PORT = process.env.PORT || 3003;
 async function start() {
     console.log("Connecting to Mongo...");
     await mongo.connect();
+
+    console.log("Connecting to Realtime Service...");
+    realtimeClient.connect();
 
     server.listen(PORT, () => {
         console.log(`Game Session Service running on port ${PORT}`);

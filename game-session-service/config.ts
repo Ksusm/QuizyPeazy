@@ -10,4 +10,7 @@ export const Config = {
     questionService: {
         url: process.env.QUESTION_SERVICE_URL || 'http://localhost:3002',
     },
+    realtimeService: {
+        url: process.env.REALTIME_SERVICE_URL || 'http://localhost:3004',
+    },
 };

@@ -79,6 +79,17 @@ services:
     networks:
       - quizy-net
 
+  realtime-service:
+    build: ./realtime-service
+    container_name: quizy-realtime-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - CORS_ORIGIN=http://localhost:3000
+    networks:
+      - quizy-net
+
 volumes:
   quizy-mongo:
   keycloak-data:

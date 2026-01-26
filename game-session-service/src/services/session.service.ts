@@ -6,6 +6,7 @@ import { SubmitAnswerDto } from "../types/dto/submitAnswer.dto";
 import { ApiError } from "../types/api.error";
 import axios from "axios";
 import { Config } from "../../config";
+import { realtimeClient } from "../utils/realtime.client";
 
 const sessionService = {
     get session_collection() {
@@ -104,7 +105,12 @@ const sessionService = {
             }
         );
 
-        return await this.findByRoomCode(roomCode);
+        const updatedSession = await this.findByRoomCode(roomCode);
+
+        // BROADCAST: Game started
+        realtimeClient.broadcastGameStart(roomCode, selectedQuestions);
+
+        return updatedSession;
     },
 
     async submitAnswer(roomCode: string, submitAnswerDto: SubmitAnswerDto) {
@@ -138,9 +144,24 @@ const sessionService = {
 
         session.answers[submitAnswerDto.userId].push(submitAnswerDto.answerIndex);
 
+        // BROADCAST: Player answered
+        realtimeClient.broadcastPlayerAnswer(
+            roomCode,
+            submitAnswerDto.userId,
+            submitAnswerDto.answerIndex
+        );
+
         if (submitAnswerDto.answerIndex === question.correctIndex) {
             session.scores[submitAnswerDto.userId] += 10;
         }
+
+        // BROADCAST: Score updated
+        realtimeClient.broadcastScoreUpdate(
+            roomCode,
+            submitAnswerDto.userId,
+            session.scores[submitAnswerDto.userId],
+            session.scores
+        );
 
         const allPlayersAnswered = session.players.every(
             playerId => session.answers[playerId]?.length === session.currentRound
@@ -149,8 +170,21 @@ const sessionService = {
         if (allPlayersAnswered) {
             if (session.currentRound >= session.questions.length) {
                 session.status = 'finished';
+
+                // BROADCAST: Game ended
+                const winner = Object.keys(session.scores).reduce((a, b) =>
+                    session.scores[a] > session.scores[b] ? a : b
+                );
+                realtimeClient.broadcastGameEnd(roomCode, session.scores, winner);
             } else {
                 session.currentRound += 1;
+
+                // BROADCAST: Round changed
+                realtimeClient.broadcastRoundChange(
+                    roomCode,
+                    session.currentRound,
+                    session.questions.length
+                );
             }
         }
 
