@@ -5,8 +5,14 @@ import questionController from "./controllers/question.controller";
 import { apiErrorHandler } from "./middleware/error.middleware";
 import { authMiddleware, hasAnyRole } from "./middleware/auth.middleware";
 import mongo from "./database/mongo";
+import cors from "cors";
 
 export const server = express();
+
+server.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+}));
+console.log('Allowed CORS for', process.env.CORS_ORIGIN);
 
 // Middleware
 server.use(express.json());

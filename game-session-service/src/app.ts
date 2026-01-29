@@ -6,8 +6,14 @@ import { apiErrorHandler } from "./middleware/error.middleware";
 import { authMiddleware } from "./middleware/auth.middleware";
 import mongo from "./database/mongo";
 import { realtimeClient } from "./utils/realtime.client";
+import cors from "cors";
 
 export const server = express();
+
+server.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+}));
+console.log('Allowed CORS for', process.env.CORS_ORIGIN);
 
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));

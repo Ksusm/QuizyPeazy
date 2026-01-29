@@ -34,6 +34,7 @@ services:
       - MONGO_DB_NAME=quizDB_auth
       - KEYCLOAK_BASE_URL=http://keycloak:8080
       - KEYCLOAK_ISSUER_URL=http://keycloak:8080
+      - CORS_ORIGIN=http://localhost:5173
       - KEYCLOAK_REALM=QUIZY-PEAZY
       - KEYCLOAK_CLIENT_ID=quizy-peazy-client
       - KEYCLOAK_CLIENT_SECRET=TxolbRHSEUm7bKGoVgp62vL3QtCdu4dc
@@ -55,6 +56,7 @@ services:
       - MONGO_URL=mongodb://mongo:27017
       - MONGO_DB_NAME=quizDB_questions
       - AUTH_SERVICE_URL=http://auth-service:3001
+      - CORS_ORIGIN=http://localhost:5173
     depends_on:
       - mongo
       - auth-service
@@ -72,6 +74,8 @@ services:
       - MONGO_DB_NAME=quizDB_game_sessions
       - AUTH_SERVICE_URL=http://auth-service:3001
       - QUESTION_SERVICE_URL=http://question-service:3002
+      - CORS_ORIGIN=http://localhost:5173
+      - REALTIME_SERVICE_URL=http://realtime-service:3004
     depends_on:
       - mongo
       - auth-service
@@ -86,7 +90,30 @@ services:
       - "3004:3004"
     environment:
       - PORT=3004
-      - CORS_ORIGIN=http://localhost:3000
+      - CORS_ORIGIN=http://localhost:5173
+    networks:
+      - quizy-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_AUTH_SERVICE_URL: http://localhost:3001
+        VITE_QUESTION_SERVICE_URL: http://localhost:3002
+        VITE_GAME_SERVICE_URL: http://localhost:3003
+        VITE_REALTIME_SERVICE_URL: http://localhost:3004
+        VITE_KEYCLOAK_BASE_URL: http://localhost:8091
+        VITE_KEYCLOAK_REALM: QUIZY-PEAZY
+        VITE_KEYCLOAK_CLIENT_ID: quizy-peasy-client
+    container_name: quizy-frontend
+    ports:
+      - "4173:4173"
+    depends_on:
+      - auth-service
+      - question-service
+      - game-session-service
+      - realtime-service
     networks:
       - quizy-net
 

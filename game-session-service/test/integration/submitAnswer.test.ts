@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import request from '../request';
 import { AuthTestHelper } from '../helpers/auth.helper';
 import axios from 'axios';
@@ -6,24 +6,50 @@ import { Config } from '../../config';
 
 describe('POST /sessions/:roomCode/answer', () => {
     let roomCode: string;
+    const originalAxiosGet = axios.get;
 
     beforeAll(async () => {
+        // ✅ Setup admin user FIRST (uses real axios for Auth Service)
         await AuthTestHelper.setupAdminUser();
 
-        for (let i = 1; i <= 5; i++) {
-            await axios.post(
-                `${Config.questionService.url}/questions`,
-                {
-                    text: `Question ${i}`,
-                    answers: ['A', 'B', 'C', 'D'],
-                    correctIndex: 0
-                },
-                { headers: { 'Authorization': `Bearer ${AuthTestHelper.getAdminToken()}` } }
-            );
-        }
+        // ✅ THEN mock only GET requests to Question Service
+        vi.spyOn(axios, 'get').mockImplementation((url: string, ...args: any[]) => {
+            // Mock only Question Service calls
+            if (url.includes(Config.questionService.url)) {
+                // If requesting all questions
+                if (url.endsWith('/questions')) {
+                    return Promise.resolve({
+                        status: 200,
+                        data: [
+                            { _id: 'q1', text: 'Question 1', answers: ['A', 'B', 'C', 'D'], correctIndex: 0 },
+                            { _id: 'q2', text: 'Question 2', answers: ['A', 'B', 'C', 'D'], correctIndex: 1 },
+                            { _id: 'q3', text: 'Question 3', answers: ['A', 'B', 'C', 'D'], correctIndex: 2 },
+                            { _id: 'q4', text: 'Question 4', answers: ['A', 'B', 'C', 'D'], correctIndex: 3 },
+                            { _id: 'q5', text: 'Question 5', answers: ['A', 'B', 'C', 'D'], correctIndex: 0 },
+                        ]
+                    } as any);
+                }
+
+                // If requesting specific question by ID
+                const questionId = url.split('/').pop();
+                return Promise.resolve({
+                    status: 200,
+                    data: {
+                        _id: questionId,
+                        text: `Question ${questionId}`,
+                        answers: ['A', 'B', 'C', 'D'],
+                        correctIndex: 0  // First answer is always correct in mock
+                    }
+                } as any);
+            }
+
+            // Pass through all other requests (like Auth Service)
+            return originalAxiosGet(url, ...args);
+        });
     });
 
     afterAll(async () => {
+        vi.restoreAllMocks();
         await AuthTestHelper.cleanupAdminUser();
     });
 

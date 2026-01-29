@@ -19,6 +19,7 @@ export const socketServer = {
             console.log('Socket.io: User ' + socket.id + ' connected');
             sockets[socket.id] = socket;
 
+            // CLIENT EVENTS (from frontend)
             socket.on('join-room', (roomCode: string) => {
                 this.subscribeToRoom(socket.id, roomCode);
             });
@@ -27,6 +28,32 @@ export const socketServer = {
                 console.log('Socket.io: User ' + socket.id + ' disconnected');
                 delete sockets[socket.id];
                 this.unsubscribeFromAllRooms(socket.id);
+            });
+
+            // SERVER EVENTS (from game-session-service)
+            socket.on('game-start', (data: GameStartEvent) => {
+                console.log('Socket.io: Received game-start event', data);
+                this.broadcastGameStart(data);
+            });
+
+            socket.on('score-update', (data: ScoreUpdateEvent) => {
+                console.log('Socket.io: Received score-update event', data);
+                this.broadcastScoreUpdate(data);
+            });
+
+            socket.on('round-change', (data: RoundChangeEvent) => {
+                console.log('Socket.io: Received round-change event', data);
+                this.broadcastRoundChange(data);
+            });
+
+            socket.on('game-end', (data: GameEndEvent) => {
+                console.log('Socket.io: Received game-end event', data);
+                this.broadcastGameEnd(data);
+            });
+
+            socket.on('player-answer', (data: PlayerAnswerEvent) => {
+                console.log('Socket.io: Received player-answer event', data);
+                this.broadcastPlayerAnswer(data);
             });
         });
     },

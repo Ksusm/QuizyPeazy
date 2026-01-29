@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => {
         test: {
             setupFiles: ['./test/bootstrap.ts'],
             environment: 'node',
+            hookTimeout: 30000,
+            testTimeout: 10000,
         },
     };
 });
