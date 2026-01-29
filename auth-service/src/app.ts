@@ -5,10 +5,16 @@ import authController from "./controllers/auth.controller";
 import { apiErrorHandler } from "./middleware/error.middleware";
 import { oAuthModel } from "./middleware/auth.middleware";
 import mongo from "./database/mongo";
+import cors from "cors";
 
 const ExpressOAuthServer = require('@node-oauth/express-oauth-server');
 
 export const server = express();
+
+server.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+}));
+console.log('Allowed CORS for', process.env.CORS_ORIGIN);
 
 // OAuth Server setup
 const oauth = new ExpressOAuthServer({ model: oAuthModel });
