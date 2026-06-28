@@ -18,4 +18,4 @@ answer questions on a timer, and watch the leaderboard update live.
 | Realtime | WebSocket live updates |
 
 ## Tech stack
-Spring Boot, WebSockets, microservices architecture
+Node.js, TypeScript, Express, MongoDB, Socket.io, microservices architecture
